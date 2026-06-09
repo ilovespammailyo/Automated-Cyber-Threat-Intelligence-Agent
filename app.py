@@ -65,8 +65,13 @@ else:
                     try:
                         res = requests.get(target_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=7, allow_redirects=True)
                         if res.history:
-                            for idx, hop in enumerate(res.history): redirect_chain_data.append(f"↪️ Hop {idx+1}: {hop.url} (Status: {hop.status_code})")
-                        redirect_chain_data.append(f"🏁 Final Destination: {res.url} (Status: {res.status_code})")
+                            for idx, hop in enumerate(res.history):
+                            # Neutralize the hyperlink by replacing https with hxxps so it cannot be clicked
+                            defanged_hop_url = hop.url.replace("https://", "hxxps://").replace("http://", "hxxp://")
+                            redirect_chain_data.append(f"↪️ Hop {idx+1}: {defanged_hop_url} (Status: {hop.status_code})")
+
+                        defanged_final_url = res.url.replace("https://", "hxxps://").replace("http://", "hxxp://")
+                        redirect_chain_data.append(f"🏁 Final Destination: {defanged_final_url} (Status: {res.status_code})")
                         target_domain_for_report = res.url
                         raw_headers = f"HTTP/{res.raw.version/10} {res.status_code}\n" + "\n".join([f"{k}: {v}" for k, v in res.headers.items()])
                         st.success("Network footprint mapped!")
