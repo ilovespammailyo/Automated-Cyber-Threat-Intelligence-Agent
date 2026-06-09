@@ -21,7 +21,7 @@ def get_domain_age(url_string):
         domain = parsed_url.netloc if parsed_url.netloc else parsed_url.path
         if ":" in domain: domain = domain.split(':')[0]
         if domain.startswith("www."): domain = domain[4:]
-        res = requests.get(f"https://rdap.org/domain/{domain}", timeout=3)
+        res = requests.get(f"https://rdap.org{domain}", timeout=3)
         if res.status_code == 200:
             for event in res.json().get("events", []):
                 if event.get("eventAction") == "registration":
@@ -29,7 +29,6 @@ def get_domain_age(url_string):
                     return reg_date.strftime("%B %d, %Y"), (datetime.now() - reg_date).days
     except Exception: pass
     return None, None
-
 API_KEY = st.secrets.get("GEMINI_API_KEY")
 if not API_KEY:
     st.error("Missing Gemini API Key. Please configure it in your platform settings.")
@@ -53,7 +52,7 @@ else:
 
     analysis_mode = st.radio("Choose Investigation Method:", ("Scan a Live Link Anonymously", "Paste Raw Logs / Headers Safely"))
     raw_headers, target_domain_for_report, redirect_chain_data = None, "", []
-    
+
     if analysis_mode == "Scan a Live Link Anonymously":
         user_url = st.text_input("Enter the suspicious URL to investigate:", placeholder="example.com")
         if st.button("Investigate Link Safely"):
@@ -65,13 +64,9 @@ else:
                     try:
                         res = requests.get(target_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=7, allow_redirects=True)
                         if res.history:
-                            for idx, hop in enumerate(res.history):
-                                # Neutralize the hyperlink by replacing https with hxxps so it cannot be clicked
-                                defanged_hop_url = hop.url.replace("https://", "hxxps://").replace("http://", "hxxp://")
-                                redirect_chain_data.append(f"↪️ Hop {idx+1}: {defanged_hop_url} (Status: {hop.status_code})")
-                                
-                        defanged_final_url = res.url.replace("https://", "hxxps://").replace("http://", "hxxp://")
-                        redirect_chain_data.append(f"🏁 Final Destination: {defanged_final_url} (Status: {res.status_code})")
+                            for idx, hop in enumerate(res.history): 
+                                redirect_chain_data.append(f"Hop {idx+1}: {hop.url} (Status: {hop.status_code})")
+                        redirect_chain_data.append(f"Final Destination: {res.url} (Status: {res.status_code})")
                         target_domain_for_report = res.url
                         raw_headers = f"HTTP/{res.raw.version/10} {res.status_code}\n" + "\n".join([f"{k}: {v}" for k, v in res.headers.items()])
                         st.success("Network footprint mapped!")
@@ -79,18 +74,22 @@ else:
     else:
         st.error("🛑 **OPSEC WARNING:** NEVER visit a suspicious site directly in your normal browser to grab logs.")
         with st.expander("🛠️ Step-by-Step: How to capture raw headers safely"):
-            st.markdown("1. Go to **[ReqBin.com](https://reqbin.com/)**.\n2. Paste the URL and click **Send**.\n3. Copy the text from the response **Raw** tab.")
+            st.markdown("1. Go to **[ReqBin.com](https://reqbin.com)**.\n2. Paste the URL and click **Send**.\n3. Copy the text from the response **Raw** tab.")
         user_logs = st.text_area("Paste raw server response logs/headers here:", height=150)
         manual_domain = st.text_input("Enter the domain associated with these logs (optional):")
         if st.button("Analyze Raw Logs Safely"):
             if not user_logs: st.warning("Please paste logs first.")
             else: raw_headers, target_domain_for_report = user_logs, manual_domain
-
     if raw_headers:
         st.subheader("🌐 Infrastructure Insights")
+        
+        # Safe Literal Render Sandbox - completely eliminates active links
         if redirect_chain_data:
             st.info("🔗 **Detected Redirect Chain (301/302 Hops):**")
-            for hop in redirect_chain_data: st.write(hop)
+            st.caption("🔒 *Note: Original URLs are rendered inside an isolated code sandbox. They are completely un-clickable but remain 100% intact for technical copy-pasting.*")
+            full_chain_text = "\n".join(redirect_chain_data)
+            st.code(full_chain_text, language="text")
+            
         if target_domain_for_report:
             reg_date, age_days = get_domain_age(target_domain_for_report)
             if reg_date:
@@ -118,13 +117,13 @@ else:
                 if ":" in clean_domain_string: clean_domain_string = clean_domain_string.split(':')[0]
                 clean_domain_string = clean_domain_string.replace("www.", "")
 
-                # Exact data object matching - no text scanning or word-guessing
+                # Strict variable object matching
                 if threat_level == "HIGH":
                     st.error("🚨 CRITICAL THREAT DETECTED: This signature meets high-confidence malicious thresholds.")
                     if clean_domain_string:
                         st.markdown("### 📢 Take Action Immediately")
                         st.text_input("Click inside to copy target domain:", value=clean_domain_string)
-                        st.link_button("📢 Open Google Safe Browsing Form", "https://safebrowsing.google.com/safebrowsing/report_phish/", type="primary")
+                        st.link_button("📢 Open Google Safe Browsing Form", "https://google.com", type="primary")
                 elif threat_level == "MEDIUM":
                     st.warning("⚠️ WARNING: This infrastructure shows suspicious indicators. Manual verification recommended.")
                 else:
