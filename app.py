@@ -123,7 +123,7 @@ else:
                     if clean_domain_string:
                         st.markdown("### 📢 Take Action Immediately")
                         st.text_input("Click inside to copy target domain:", value=clean_domain_string)
-                        st.link_button("📢 Open Google Safe Browsing Form", "https://google.com", type="primary")
+                        st.link_button("📢 Open Google Safe Browsing Form", "https://www.google.com/safebrowsing/report_phish/", type="primary")
                 elif threat_level == "MEDIUM":
                     st.warning("⚠️ WARNING: This infrastructure shows suspicious indicators. Manual verification recommended.")
                 else:
