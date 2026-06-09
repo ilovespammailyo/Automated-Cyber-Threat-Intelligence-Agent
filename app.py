@@ -1,11 +1,25 @@
 import streamlit as st
 import google.generativeai as genai
 import requests
+import urllib.parse
 
 # 1. Configure the Web Page Layout
 st.set_page_config(page_title="🛡️ ShieldAI: Open-Source Link Investigator", layout="centered")
 st.title("🛡️ ShieldAI: Autonomous Link Investigator")
 st.write("Analyze a live link or safely paste raw server logs/headers to discover its true structural intent.")
+
+# ==========================================
+# ⚠️ SECURITY DISCLAIMER & SAFETY BANNER
+# ==========================================
+st.warning(
+    "⚠️ **IMPORTANT SECURITY NOTICE & DISCLAIMER**\n\n"
+    "This tool is designed for educational, informational, and preliminary incident response analysis only. "
+    "While it uses advanced AI threat intelligence to detect infrastructure anomalies, **no automated scanner is 100% accurate.** "
+    "Clever threat actors constantly modify their infrastructure to evade detection. "
+    "Always exercise caution: **never** enter passwords, sensitive personal details, or financial credentials on "
+    "untrusted sites, regardless of this tool's assessment. Use of this software is entirely at your own risk."
+)
+st.divider() # Visual separation line
 
 # 2. Securely Initialize Gemini API
 API_KEY = st.secrets.get("GEMINI_API_KEY")
@@ -20,6 +34,7 @@ else:
     analysis_mode = st.radio("Choose Investigation Method:", ("Scan a Live Link Anonymously", "Paste Raw Logs / Headers Safely"))
 
     raw_headers = None
+    target_domain_for_report = ""
 
     if analysis_mode == "Scan a Live Link Anonymously":
         user_url = st.text_input("Enter the suspicious URL to investigate:", placeholder="example.com")
@@ -31,6 +46,9 @@ else:
                     target_url = 'http://' + user_url
                 else:
                     target_url = user_url
+                
+                # Save clean version for the reporting link
+                target_domain_for_report = target_url
 
                 with st.spinner("Fetching technical headers anonymously..."):
                     try:
@@ -48,11 +66,13 @@ else:
 
     else:
         user_logs = st.text_area("Paste raw server response logs/headers here:", height=200, placeholder="HTTP/1.1 404 Not Found\nServer: nginx...")
+        manual_domain = st.text_input("Enter the domain associated with these logs (optional, for reporting):", placeholder="example.com")
         if st.button("Analyze Raw Logs Safely"):
             if not user_logs:
                 st.warning("Please paste some text logs first.")
             else:
                 raw_headers = user_logs
+                target_domain_for_report = manual_domain
 
     # 4. Core AI Processing Engine
     if raw_headers:
@@ -76,7 +96,23 @@ else:
                 
                 # Dynamic visual banners based on structural header verdicts
                 if "THREAT LEVEL ASSESSMENT: HIGH" in ai_analysis.text.upper():
-                    st.error("🚨 CRITICAL THREAT DETECTED: This signature meets high-confidence malicious thresholds. (Automated Google Safe Browsing report would trigger here).")
+                    st.error("🚨 CRITICAL THREAT DETECTED: This signature meets high-confidence malicious thresholds.")
+                    
+                    # 5. AUTOMATED REPORT GENERATION ENGINE
+                    if target_domain_for_report:
+                        # Clean the URL formatting for safe transit
+                        encoded_url = urllib.parse.quote(target_domain_for_report)
+                        # Build the pre-filled Google Safe Browsing report endpoint URL
+                        google_report_url = f"https://google.com{encoded_url}"
+                        
+                        st.markdown("### 📢 Take Action Immediately")
+                        st.write("You can protect millions of internet users by instantly adding this domain to Google Chrome's global blocklist.")
+                        
+                        # Display a beautiful, actionable button linking to Google
+                        st.link_button("📢 Report Domain to Google Safe Browsing", google_report_url, type="primary")
+                    else:
+                        st.info("ℹ️ To auto-generate a 1-click Google Report link, please make sure the domain or URL input field is filled above.")
+                        
                 elif "THREAT LEVEL ASSESSMENT: MEDIUM" in ai_analysis.text.upper():
                     st.warning("⚠️ WARNING: This infrastructure shows suspicious indicators. Manual verification recommended.")
                 else:
