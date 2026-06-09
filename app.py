@@ -70,9 +70,14 @@ else:
                         st.subheader("📊 AI Agent Security Verdict")
                         st.write(ai_analysis.text)
                         
-                        # Future automation flag for step 4 (Automated Reporting)
-                        if "HIGH" in ai_analysis.text.upper():
-                            st.info("🚨 This signature meets high-confidence threat thresholds. (Automated Google Safe Browsing report would trigger here).")
+                        # Future automation flag - only triggers if the word "THREAT LEVEL ASSESSMENT: HIGH" is explicitly stated
+                        if "THREAT LEVEL ASSESSMENT: HIGH" in ai_analysis.text.upper():
+                            st.error("🚨 CRITICAL THREAT DETECTED: This signature meets high-confidence malicious thresholds. (Automated Google Safe Browsing report would trigger here).")
+                        elif "THREAT LEVEL ASSESSMENT: MEDIUM" in ai_analysis.text.upper():
+                            st.warning("⚠️ WARNING: This infrastructure shows suspicious indicators. Manual verification recommended.")
+                        else:
+                            st.success("✅ SAFE: This website matches legitimate infrastructure patterns.")
+
                             
                     except Exception as gen_err:
                         st.error(f"Analysis engine hit a quota or safety barrier: {str(gen_err)}")
