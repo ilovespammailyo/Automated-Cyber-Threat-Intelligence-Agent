@@ -101,7 +101,7 @@ if not API_KEY:
     st.error("Missing Gemini API Key. Please configure it in your platform settings.")
 else:
     genai.configure(api_key=API_KEY)
-    # Using Gemini 1.5 Flash for rapid, cost-effective security text analysis
+    # Using Gemini 3.5 Flash for rapid, cost-effective security text analysis
     model = genai.GenerativeModel('gemini-3.5-flash')
 
     # 3. User Input Form
