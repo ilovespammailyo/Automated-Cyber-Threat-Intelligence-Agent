@@ -16,7 +16,7 @@ if not API_KEY:
 else:
     genai.configure(api_key=API_KEY)
     # Using Gemini 1.5 Flash for rapid, cost-effective security text analysis
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-3.5-flash')
 
     # 3. User Input Form
     user_url = st.text_input("Enter the suspicious URL to investigate:", placeholder="example.com")
