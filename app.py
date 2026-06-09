@@ -44,7 +44,7 @@ API_KEY = st.secrets.get("GEMINI_API_KEY")
 if not API_KEY:
     st.error("Missing Gemini API Key. Please configure it in your platform settings.")
 else:
-    genai.configure(api_key=api_key)
+    genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-3.5-flash')
 
     # 3. Choose Input Type
