@@ -140,8 +140,10 @@ else:
                     if target_domain_for_report:
                         # Clean the URL formatting for safe transit
                         encoded_url = urllib.parse.quote(target_domain_for_report)
-                        # Build the pre-filled Google Safe Browsing report endpoint URL
-                        google_report_url = f"https://google.com{encoded_url}"
+                        # Ensure the target domain is strictly passed as a web parameter value
+                        clean_domain = target_domain_for_report.replace("http://", "").replace("https://", "")
+                        google_report_url = f"https://google.com{urllib.parse.quote(clean_domain)}"
+
                         
                         st.markdown("### 📢 Take Action Immediately")
                         st.write("You can protect millions of internet users by instantly adding this domain to Google Chrome's global blocklist.")
