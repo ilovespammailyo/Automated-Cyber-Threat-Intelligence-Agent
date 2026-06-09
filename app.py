@@ -44,7 +44,7 @@ API_KEY = st.secrets.get("GEMINI_API_KEY")
 if not API_KEY:
     st.error("Missing Gemini API Key. Please configure it in your platform settings.")
 else:
-    genai.configure(api_key=API_KEY)
+    genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-3.5-flash')
 
     # 3. Choose Input Type
@@ -64,7 +64,6 @@ else:
                 else:
                     target_url = user_url
                 
-                # Save clean version for the reporting link
                 target_domain_for_report = target_url
 
                 with st.spinner("Fetching technical headers anonymously..."):
@@ -128,33 +127,36 @@ else:
             
             try:
                 ai_analysis = model.generate_content(full_prompt)
+                analysis_text = ai_analysis.text
                 
                 st.subheader("📊 AI Agent Security Verdict")
-                st.write(ai_analysis.text)
+                st.write(analysis_text)
                 
-                # Dynamic visual banners based on structural header verdicts
-                if "THREAT LEVEL ASSESSMENT: HIGH" in ai_analysis.text.upper():
+                # Split text by lines to inspect only the VERY FIRST LINE for formatting accuracy
+                lines = [line.strip().upper() for line in analysis_text.split('\n') if line.strip()]
+                first_line = lines[0] if lines else ""
+                st.divider()
+
+                # Clean the target domain string for display
+                clean_domain_string = target_domain_for_report.replace("http://", "").replace("https://", "").split('/')[0]
+
+                # Exact structure matching logic block
+                if "HIGH" in first_line:
                     st.error("🚨 CRITICAL THREAT DETECTED: This signature meets high-confidence malicious thresholds.")
                     
-                    # 5. FIXED REPORT GENERATION ENGINE
-                    if target_domain_for_report:
-                        # Strip prefixes so the user has a clean domain string to copy
-                        clean_domain_string = target_domain_for_report.replace("http://", "").replace("https://", "")
-                        
+                    if clean_domain_string:
                         st.markdown("### 📢 Take Action Immediately")
-                        st.write("You can protect millions of internet users by adding this domain to Google Chrome's global blocklist.")
+                        st.write("Protect the public by copying this domain and submitting it to the global blocklist:")
                         
-                        # Provide an interactive code snippet box so users can easily highlight and copy it
-                        st.text_input("📋 Copy this domain to paste into Google's form:", value=clean_domain_string, disabled=True)
+                        # Interactive text box to make copying the domain immediate
+                        st.text_input("Click inside to copy target domain:", value=clean_domain_string, disabled=False)
                         
-                        # Clean link routing straight to the official reporting page
                         google_report_url = "https://safebrowsing.google.com/safebrowsing/report_phish/"
                         st.link_button("📢 Open Google Safe Browsing Form", google_report_url, type="primary")
                     else:
-                        st.info("ℹ️ To generate a reporting workflow, please make sure the domain or URL input field is filled above.")
-
+                        st.info("ℹ️ Enter the target domain name in the input box above to generate an action workflow.")
                         
-                elif "THREAT LEVEL ASSESSMENT: MEDIUM" in ai_analysis.text.upper():
+                elif "MEDIUM" in first_line:
                     st.warning("⚠️ WARNING: This infrastructure shows suspicious indicators. Manual verification recommended.")
                 else:
                     st.success("✅ SAFE: This website matches legitimate infrastructure patterns.")
