@@ -19,6 +19,23 @@ st.warning(
     "Always exercise caution: **never** enter passwords, sensitive personal details, or financial credentials on "
     "untrusted sites, regardless of this tool's assessment. Use of this software is entirely at your own risk."
 )
+
+# ==========================================
+# 🤝 TRANSPARENCY, PRIVACY & TRUST PANEL
+# ==========================================
+with st.expander("🤝 How does ShieldAI protect my privacy? (Layman's Explanation)"):
+    st.markdown(
+        "### We designed this tool to be completely transparent and safe for you to use:\n\n"
+        "1. **Your IP Address is Invisible:** When you scan a link, our server acts as a digital shield. "
+        "The suspicious website only sees a neutral cloud computing network—**your personal device, home location, and real identity are never exposed** to the target.\n"
+        "2. **We Don't Track You:** ShieldAI does not use tracking cookies, account logins, or user databases. "
+        "Your scans are completely private and processed in real time.\n"
+        "3. **Completely Open Source (Apache 2.0):** Our entire blueprint is completely public! "
+        "Anyone in the world can inspect our exact code to verify that it handles data securely and contains no hidden malicious agendas.\n"
+        "4. **AI-Powered Diagnostics:** We pipe the raw technical data into Google's Gemini engine to translate "
+        "complex code into clear security assessments, helping you make informed safety decisions instantly."
+    )
+
 st.divider() # Visual separation line
 
 # 2. Securely Initialize Gemini API
