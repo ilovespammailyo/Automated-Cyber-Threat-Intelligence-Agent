@@ -136,22 +136,26 @@ else:
                 if "THREAT LEVEL ASSESSMENT: HIGH" in ai_analysis.text.upper():
                     st.error("🚨 CRITICAL THREAT DETECTED: This signature meets high-confidence malicious thresholds.")
                     
-                    # 5. AUTOMATED REPORT GENERATION ENGINE
+                 # Dynamic visual banners based on structural header verdicts
+                if "THREAT LEVEL ASSESSMENT: HIGH" in ai_analysis.text.upper():
+                    st.error("🚨 CRITICAL THREAT DETECTED: This signature meets high-confidence malicious thresholds.")
+                    
+                    # 5. FIXED REPORT GENERATION ENGINE
                     if target_domain_for_report:
-                        # Clean the URL formatting for safe transit
-                        encoded_url = urllib.parse.quote(target_domain_for_report)
-                        # Ensure the target domain is strictly passed as a web parameter value
-                        clean_domain = target_domain_for_report.replace("http://", "").replace("https://", "")
-                        google_report_url = f"https://google.com{urllib.parse.quote(clean_domain)}"
-
+                        # Strip prefixes so the user has a clean domain string to copy
+                        clean_domain_string = target_domain_for_report.replace("http://", "").replace("https://", "")
                         
                         st.markdown("### 📢 Take Action Immediately")
-                        st.write("You can protect millions of internet users by instantly adding this domain to Google Chrome's global blocklist.")
+                        st.write("You can protect millions of internet users by adding this domain to Google Chrome's global blocklist.")
                         
-                        # Display a beautiful, actionable button linking to Google
-                        st.link_button("📢 Report Domain to Google Safe Browsing", google_report_url, type="primary")
+                        # Provide an interactive code snippet box so users can easily highlight and copy it
+                        st.text_input("📋 Copy this domain to paste into Google's form:", value=clean_domain_string, disabled=True)
+                        
+                        # Clean link routing straight to the official reporting page
+                        google_report_url = "https://safebrowsing.google.com/safebrowsing/report_phish/"
+                        st.link_button("📢 Open Google Safe Browsing Form", google_report_url, type="primary")
                     else:
-                        st.info("ℹ️ To auto-generate a 1-click Google Report link, please make sure the domain or URL input field is filled above.")
+                        st.info("ℹ️ To generate a reporting workflow, please make sure the domain or URL input field is filled above.")
                         
                 elif "THREAT LEVEL ASSESSMENT: MEDIUM" in ai_analysis.text.upper():
                     st.warning("⚠️ WARNING: This infrastructure shows suspicious indicators. Manual verification recommended.")
