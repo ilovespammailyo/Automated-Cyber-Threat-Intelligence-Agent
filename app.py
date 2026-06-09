@@ -82,6 +82,27 @@ else:
                         st.error(f"Target connection failed or blocked: {str(e)}. Try switching to 'Paste Raw Logs / Headers Safely' mode.")
 
     else:
+        # ==========================================
+        # 🛑 ADVANCED USER RISK WARNING & HOW-TO
+        # ==========================================
+        st.error(
+            "🛑 **ADVANCED USER MODE: OPERATIONAL SECURITY (OPSEC) WARNING**\n\n"
+            "**NEVER visit a suspicious website directly in your standard browser to copy headers.** "
+            "Doing so executes the malicious scripts on your machine and exposes your real IP address to the attacker. "
+            "To capture logs safely, you must use a neutral, isolated intermediary tool."
+        )
+        
+        with st.expander("🛠️ Step-by-Step: How to capture raw headers safely without risking your IP"):
+            st.markdown(
+                "If our automated scanner gets blocked by website cloaking, follow these steps to manually gather text logs safely:\n\n"
+                "1. Go to a free, cloud-hosted API testing tool like **[ReqBin.com](https://reqbin.com)**.\n"
+                "2. Paste the suspicious URL into ReqBin's URL bar (leave the setting on **GET**).\n"
+                "3. Click **Send**.\n"
+                "4. ReqBin's cloud servers will visit the site *for you*, keeping your device completely safe. "
+                "Once the request completes, click the **Raw** tab in the right-hand response panel.\n"
+                "5. Copy that text wall and paste it into the box below."
+            )
+        
         user_logs = st.text_area("Paste raw server response logs/headers here:", height=200, placeholder="HTTP/1.1 404 Not Found\nServer: nginx...")
         manual_domain = st.text_input("Enter the domain associated with these logs (optional, for reporting):", placeholder="example.com")
         if st.button("Analyze Raw Logs Safely"):
